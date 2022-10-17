@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -85,9 +86,17 @@ Flags are:`)
 }
 
 func add(args []string) error {
-	passwordEntries, err := readPasswords()
-	if err != nil {
-		return fmt.Errorf("readPasswords(): %s", err.Error())
+	var passwordEntries []PasswordEntry
+	var err error
+
+	_, err = os.Stat(filePath)
+	if errors.Is(err, os.ErrNotExist) {
+		passwordEntries = make([]PasswordEntry, 0)
+	} else {
+		passwordEntries, err = readPasswords()
+		if err != nil {
+			return fmt.Errorf("readPasswords(): %s", err.Error())
+		}
 	}
 
 	reader := bufio.NewReader(os.Stdin)
