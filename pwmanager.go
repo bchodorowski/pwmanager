@@ -26,6 +26,7 @@ type PasswordEntry struct {
 var (
 	filePath    string
 	passwordLen int
+	removeChars string
 )
 
 type wrongUsageError struct{}
@@ -123,7 +124,7 @@ func add(args []string) error {
 	}
 	comment := string(line)
 
-	p, err := exec.Command("pwgen", "-s", "-y", "-n", fmt.Sprintf("%d", passwordLen), "1").Output()
+	p, err := exec.Command("pwgen", "-s", "-y", "-n", fmt.Sprintf("%d", passwordLen), "-r", removeChars, "1").Output()
 	if err != nil {
 		return fmt.Errorf("pwgen: %s", err.Error())
 	}
@@ -237,7 +238,9 @@ func main() {
 	flag.StringVar(&filePath, "f", "",
 		"name of file that stores the passwords. Leave empty for the default $HOME/.pwmanager/passwords.json")
 	flag.IntVar(&passwordLen, "l", 24,
-		"password length to generate with 'add' command")
+		"password length to generate with the 'add' command")
+	flag.StringVar(&removeChars, "r", "",
+		"remove characters from the set of characters to generate password with the 'add' command")
 	flag.Parse()
 
 	args := flag.Args()
