@@ -24,7 +24,8 @@ type PasswordEntry struct {
 }
 
 var (
-	filePath string
+	filePath    string
+	passwordLen int
 )
 
 type wrongUsageError struct{}
@@ -70,7 +71,7 @@ func writePasswords(passwords []PasswordEntry) error {
 }
 
 func printUsage() {
-	fmt.Fprintln(os.Stderr, `Usage: pwmanager <command> [flags]
+	fmt.Fprintln(os.Stderr, `Usage: pwmanager [flags] <command>
 
 Commands are:
   add
@@ -122,7 +123,7 @@ func add(args []string) error {
 	}
 	comment := string(line)
 
-	p, err := exec.Command("pwgen", "-s", "-y", "-n", "24", "1").Output()
+	p, err := exec.Command("pwgen", "-s", "-y", "-n", fmt.Sprintf("%d", passwordLen), "1").Output()
 	if err != nil {
 		return fmt.Errorf("pwgen: %s", err.Error())
 	}
@@ -234,7 +235,9 @@ func get(args []string) error {
 func main() {
 	// parse the arguments
 	flag.StringVar(&filePath, "f", "",
-		"Name of file that stores the passwords. Leave empty for the default $HOME/.pwmanager/passwords.json")
+		"name of file that stores the passwords. Leave empty for the default $HOME/.pwmanager/passwords.json")
+	flag.IntVar(&passwordLen, "l", 24,
+		"password length to generate with 'add' command")
 	flag.Parse()
 
 	args := flag.Args()
